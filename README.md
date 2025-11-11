@@ -47,12 +47,12 @@ Password:
 curl --location --request POST 'http://localhost:8080/api/users' --header 'Content-Type: application/json' --data-raw '{
   "name": "Alessandro Riega",
   "email": "alessandro.riega@gmail.com",
-  "password": "password.123",
+  "password": "Password.123",
   "phones": [
     {
       "number": "1234567",
-      "citycode": "1",
-      "countrycode": "57"
+      "cityCode": "1",
+      "countryCode": "57"
     }
   ]
 }'
@@ -64,12 +64,12 @@ curl --location --request POST 'http://localhost:8080/api/users' --header 'Conte
 {
   "id": "9bcb3c26-8e10-4e92-9c44-b2eac3dc3f10",
   "name": "Alessandro Riega",
-  "email": "alessandro.riega@gmail.com",
+  "email": "ale******a@gmail.com",
   "phones": [
     {
-      "number": "1234567",
-      "citycode": "1",
-      "countrycode": "57"
+      "number": "****67",
+      "cityCode": "1",
+      "contryCode": "57"
     }
   ],
   "created": "2025-11-10T15:42:13Z",

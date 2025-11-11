@@ -21,7 +21,7 @@ class UserValidatorTest {
     void setUp() {
         RegexProperties regexProps = new RegexProperties();
         regexProps.setEmailRegex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        regexProps.setPasswordRegex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d.!@#$%^&*()_+\\-=]{8,}$");
+        regexProps.setPasswordRegex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-])[A-Za-z\\d@$!%*?&._-]{8,}$");
 
         userRepositoryPort = mock(UserRepositoryPort.class);
 
@@ -35,7 +35,7 @@ class UserValidatorTest {
         UserRequest userRequest = new UserRequest();
         userRequest.setName("Alessandro");
         userRequest.setEmail("alessandro@gmail.com");
-        userRequest.setPassword("password.123");
+        userRequest.setPassword("Password@123");
 
         when(userRepositoryPort.existsByEmail("alessandro@gmail.com")).thenReturn(false);
 
@@ -46,7 +46,7 @@ class UserValidatorTest {
     void validate_shouldFailOnEmailFormat() {
         UserRequest userRequest = new UserRequest();
         userRequest.setEmail("bad-email");
-        userRequest.setPassword("password.123");
+        userRequest.setPassword("Password.123");
 
         assertThatThrownBy(() -> validator.validate(userRequest))
                 .isInstanceOf(BusinessException.class)
@@ -68,7 +68,7 @@ class UserValidatorTest {
     void validate_shouldFailWhenEmailAlreadyExists() {
         UserRequest userRequest = new UserRequest();
         userRequest.setEmail("exists@mail.com");
-        userRequest.setPassword("password123");
+        userRequest.setPassword("Password.123");
 
         when(userRepositoryPort.existsByEmail("exists@mail.com")).thenReturn(true);
 

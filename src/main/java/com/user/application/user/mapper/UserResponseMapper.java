@@ -13,10 +13,11 @@ public class UserResponseMapper {
         return new UserResponse(
                 user.getId(),
                 user.getName(),
-                user.getEmail(),
+                maskEmail(user.getEmail()),
                 user.getPhones().stream()
                         .map(p ->
-                                new UserResponse.PhoneResponse(p.getNumber(), p.getCityCode(), p.getCountryCode()))
+                                new UserResponse
+                                        .PhoneResponse(maskPhoneNumber(p.getNumber()), p.getCityCode(), p.getCountryCode()))
                         .collect(Collectors.toList()),
                 user.getCreated(),
                 user.getModified(),
@@ -25,4 +26,21 @@ public class UserResponseMapper {
                 user.isActive()
         );
     }
+
+    private String maskEmail(String email) {
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 1) {
+            return "***";
+        }
+        return email.substring(0, Math.min(3, atIndex)) + "***" + email.substring(atIndex);
+    }
+    private String maskPhoneNumber(String number) {
+        if (number == null || number.length() < 4) {
+            return "***";
+        }
+        int visibleDigits = 3;
+        String hiddenPart = "*".repeat(Math.max(0, number.length() - visibleDigits));
+        return hiddenPart + number.substring(number.length() - visibleDigits);
+    }
+
 }
