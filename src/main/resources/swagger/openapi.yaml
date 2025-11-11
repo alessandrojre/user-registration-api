@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: User Registration API
+  version: 1.0.0
+  description: API REST para registro de usuarios y listado de productos (JWT)
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Users
+    description: Operaciones de usuarios
+  - name: Products
+    description: Endpoints de productos (requieren JWT)
+
+paths:
+  /api/users:
+    post:
+      tags: [Users]
+      summary: Registrar un nuevo usuario
+      description: Crea un usuario, valida email/clave por regex y genera token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+            examples:
+              ejemplo:
+                value:
+                  name: "Juan Rodriguez"
+                  email: "juan@rodriguez.org"
+                  password: "hunter2"
+                  phones:
+                    - number: "1234567"
+                      citycode: "1"
+                      countrycode: "57"
+      responses:
+        '201':
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: El correo ya está registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/products:
+    get:
+      tags: [Products]
+      summary: Listar productos
+      description: Lista productos, endpoint requiere auth.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
+        '401':
+          description: No autorizado (token ausente/expirado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Prohibido (sin permisos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PhoneRequest:
+      type: object
+      required: [number, citycode, countrycode]
+      properties:
+        number: { type: string, example: "1234567" }
+        citycode: { type: string, example: "1" }
+        countrycode: { type: string, example: "57" }
+
+    UserRequest:
+      type: object
+      required: [name, email, password, phones]
+      properties:
+        name: { type: string, example: "Alessandro Riega" }
+        email: { type: string, format: email, example: "juan@gmail.com" }
+        password: { type: string, example: "password123" }
+        phones:
+          type: array
+          items: { $ref: '#/components/schemas/PhoneRequest' }
+
+    PhoneResponse:
+      type: object
+      properties:
+        number: { type: string }
+        citycode: { type: string }
+        countrycode: { type: string }
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        phones:
+          type: array
+          items: { $ref: '#/components/schemas/PhoneResponse' }
+        created: { type: string, format: date-time }
+        modified: { type: string, format: date-time }
+        last_login: { type: string, format: date-time }
+        token: { type: string, description: "JWT" }
+        isactive: { type: boolean }
+
+    ProductResponse:
+      type: object
+      properties:
+        id: { type: string, example: "P-1001" }
+        name: { type: string, example: "Teclado Mecánico" }
+        price: { type: number, format: double, example: 149.90 }
+
+    ErrorResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: "No autorizado"
