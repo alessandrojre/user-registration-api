@@ -2,7 +2,9 @@ package com.user.application.user.dto;
 
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ public class UserRequest {
     private List<PhoneRequest> phones;
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class PhoneRequest {
         @NotBlank
         private String number;
