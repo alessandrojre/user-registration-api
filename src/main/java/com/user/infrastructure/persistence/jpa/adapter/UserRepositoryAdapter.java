@@ -5,40 +5,55 @@ import com.user.domain.user.port.UserRepositoryPort;
 import com.user.infrastructure.persistence.jpa.mapper.UserEntityMapper;
 import com.user.infrastructure.persistence.jpa.model.PhoneEntity;
 import com.user.infrastructure.persistence.jpa.model.UserEntity;
-import com.user.infrastructure.persistence.jpa.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.user.infrastructure.persistence.jpa.repository.phone.PhoneRepository;
+import com.user.infrastructure.persistence.jpa.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepositoryAdapter implements UserRepositoryPort {
 
     private final UserRepository userRepository;
-    private final UserEntityMapper userEntityMapper;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final PhoneRepository phoneRepository;
+    private final UserEntityMapper mapper;
 
     public UserRepositoryAdapter(UserRepository userRepository,
-                                 UserEntityMapper userEntityMapper) {
+                                 PhoneRepository phoneRepository,
+                                 UserEntityMapper mapper) {
         this.userRepository = userRepository;
-        this.userEntityMapper = userEntityMapper;
+        this.phoneRepository = phoneRepository;
+        this.mapper = mapper;
     }
 
     @Override
     @Transactional
     public User save(User user) {
-        UserEntity userEntity = userEntityMapper.toEntity(user);
+        UserEntity entity = mapper.toEntity(user);
+        UserEntity persisted = userRepository.save(entity);
 
-        UserEntity persistedUserEntity = userRepository.save(userEntity);
+        List<PhoneEntity> phoneEntities = user.getPhones().stream().map(p -> {
+            PhoneEntity pe = new PhoneEntity();
+            pe.setNumber(p.getNumber());
+            pe.setCityCode(p.getCityCode());
+            pe.setCountryCode(p.getCountryCode());
+            pe.setUser(persisted);
+            return pe;
+        }).toList();
+        phoneRepository.saveAll(phoneEntities);
 
-        List<PhoneEntity> phoneEntities = userEntityMapper.toPhoneEntities(persistedUserEntity, user.getPhones());
-        phoneEntities.forEach(entityManager::persist);
+        List<PhoneEntity> reloaded = phoneRepository.findByUserId(persisted.getId());
+        return mapper.toDomain(persisted, reloaded);
+    }
 
-        return userEntityMapper.toDomain(persistedUserEntity, user.getPhones());
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email).map(userEntity -> {
+            List<PhoneEntity> phones = phoneRepository.findByUserId(userEntity.getId());
+            return mapper.toDomain(userEntity, phones);
+        });
     }
 
     @Override

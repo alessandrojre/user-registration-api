@@ -9,6 +9,7 @@ import com.user.domain.user.User;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,8 +35,16 @@ public class UserFactory {
         OffsetDateTime now = OffsetDateTime.now();
 
         return new User(
-                userId, request.getName(), request.getEmail(), passwordHash,
-                phones, now, now, now, token, true
+                userId,
+                request.getName(),
+                request.getEmail(),
+                passwordHash,
+                phones,
+                now,
+                now,
+                now,
+                token,
+                true
         );
     }
 
@@ -49,8 +58,12 @@ public class UserFactory {
     }
 
     private List<Phone> mapPhones(UserRequest request) {
-        return request.getPhones().stream()
+        List<UserRequest.PhoneRequest> phones = request.getPhones();
+
+        return phones.stream()
+                .filter(Objects::nonNull)
                 .map(p -> new Phone(p.getNumber(), p.getCityCode(), p.getCountryCode()))
                 .collect(Collectors.toList());
     }
+
 }
