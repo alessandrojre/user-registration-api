@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "phones")
+@Table(name = "phones", indexes = {
+        @Index(name = "idx_phones_user_id", columnList = "user_id")
+})
 @Getter
 @Setter
 public class PhoneEntity {

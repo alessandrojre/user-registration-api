@@ -76,12 +76,12 @@ class UserEntityMapperTest {
         entity.setToken("jwt");
         entity.setActive(true);
 
-        Phone phone = new Phone();
-        phone.setNumber("1234567");
-        phone.setCityCode("1");
-        phone.setCountryCode("57");
+        PhoneEntity phoneEntity = new PhoneEntity();
+        phoneEntity.setNumber("1234567");
+        phoneEntity.setCityCode("1");
+        phoneEntity.setCountryCode("57");
 
-        User domain = mapper.toDomain(entity, List.of(phone));
+        User domain = mapper.toDomain(entity, List.of(phoneEntity));
 
         assertThat(domain.getId()).isEqualTo(id);
         assertThat(domain.getPhones()).hasSize(1);

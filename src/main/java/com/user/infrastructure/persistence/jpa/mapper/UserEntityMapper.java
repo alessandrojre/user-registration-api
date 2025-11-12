@@ -7,43 +7,36 @@ import com.user.infrastructure.persistence.jpa.model.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Component
 public class UserEntityMapper {
 
     public UserEntity toEntity(User user) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(user.getId());
-        userEntity.setName(user.getName());
-        userEntity.setEmail(user.getEmail());
-        userEntity.setPassword(user.getPassword());
-        userEntity.setCreated(user.getCreated());
-        userEntity.setModified(user.getModified());
-        userEntity.setLastLogin(user.getLastLogin());
-        userEntity.setToken(user.getToken());
-        userEntity.setActive(user.isActive());
-        return userEntity;
+        if (user == null) return null;
+
+        UserEntity e = new UserEntity();
+        e.setId(user.getId());
+        e.setName(user.getName());
+        e.setEmail(user.getEmail());
+        e.setPassword(user.getPassword());
+        e.setCreated(user.getCreated());
+        e.setModified(user.getModified());
+        e.setLastLogin(user.getLastLogin());
+        e.setToken(user.getToken());
+        e.setActive(user.isActive());
+        return e;
     }
 
-    public List<PhoneEntity> toPhoneEntities(UserEntity persistedUserEntity, List<Phone> phones) {
-        if (phones == null || phones.isEmpty()) {
-            return List.of();
-        }
+    public User toDomain(UserEntity userEntity, List<PhoneEntity> phoneEntities) {
+        if (userEntity == null) return null;
 
-        return phones.stream()
-                .map(phone -> {
-                    PhoneEntity phoneEntity = new PhoneEntity();
-                    phoneEntity.setNumber(phone.getNumber());
-                    phoneEntity.setCityCode(phone.getCityCode());
-                    phoneEntity.setCountryCode(phone.getCountryCode());
-                    phoneEntity.setUser(persistedUserEntity);
-                    return phoneEntity;
-                })
-                .collect(Collectors.toList());
-    }
+        List<Phone> phones = phoneEntities == null ? List.of()
+                : phoneEntities.stream()
+                .filter(Objects::nonNull)
+                .map(this::toDomainPhone)
+                .toList();
 
-    public User toDomain(UserEntity userEntity, List<Phone> phones) {
         return new User(
                 userEntity.getId(),
                 userEntity.getName(),
@@ -56,5 +49,25 @@ public class UserEntityMapper {
                 userEntity.getToken(),
                 userEntity.isActive()
         );
+    }
+
+    public List<PhoneEntity> toPhoneEntities(UserEntity owner, List<Phone> phones) {
+        if (owner == null || phones == null || phones.isEmpty()) return List.of();
+
+        return phones.stream()
+                .filter(Objects::nonNull)
+                .map(p -> {
+                    PhoneEntity pe = new PhoneEntity();
+                    pe.setNumber(p.getNumber());
+                    pe.setCityCode(p.getCityCode());
+                    pe.setCountryCode(p.getCountryCode());
+                    pe.setUser(owner); // back-reference
+                    return pe;
+                })
+                .toList();
+    }
+
+    private Phone toDomainPhone(PhoneEntity pe) {
+        return new Phone(pe.getNumber(), pe.getCityCode(), pe.getCountryCode());
     }
 }

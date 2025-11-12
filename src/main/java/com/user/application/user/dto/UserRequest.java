@@ -3,6 +3,7 @@ package com.user.application.user.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class UserRequest {
     @NotBlank
     private String password;
 
+    @NotEmpty
     private List<@Valid PhoneRequest> phones;
 
     @Data
