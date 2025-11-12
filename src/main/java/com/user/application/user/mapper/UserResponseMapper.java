@@ -15,9 +15,10 @@ public class UserResponseMapper {
                 user.getName(),
                 maskEmail(user.getEmail()),
                 user.getPhones().stream()
-                        .map(p ->
-                                new UserResponse
-                                        .PhoneResponse(maskPhoneNumber(p.getNumber()), p.getCityCode(), p.getCountryCode()))
+                        .map(p -> new UserResponse.PhoneResponse(
+                                maskPhoneNumber(p.getNumber()),
+                                p.getCityCode(),
+                                p.getCountryCode()))
                         .collect(Collectors.toList()),
                 user.getCreated(),
                 user.getModified(),
@@ -28,19 +29,22 @@ public class UserResponseMapper {
     }
 
     private String maskEmail(String email) {
+        if (email == null) return "***";
         int atIndex = email.indexOf('@');
-        if (atIndex <= 1) {
-            return "***";
-        }
-        return email.substring(0, Math.min(3, atIndex)) + "***" + email.substring(atIndex);
-    }
-    private String maskPhoneNumber(String number) {
-        if (number == null || number.length() < 4) {
-            return "***";
-        }
-        int visibleDigits = 3;
-        String hiddenPart = "*".repeat(Math.max(0, number.length() - visibleDigits));
-        return hiddenPart + number.substring(number.length() - visibleDigits);
+        if (atIndex < 0) return "***";
+        String local = email.substring(0, atIndex);
+        String domain = email.substring(atIndex); // incluye '@'
+        String visible = local.length() <= 2 ? local.substring(0, 1)
+                : local.substring(0, Math.min(3, local.length()));
+        return visible + "***" + domain;
     }
 
+    private String maskPhoneNumber(String number) {
+        if (number == null) return "***";
+        String digits = number.replaceAll("\\D", "");
+        if (digits.length() < 4) return "***";
+        int visibleDigits = 3;
+        String hiddenPart = "*".repeat(Math.max(0, digits.length() - visibleDigits));
+        return hiddenPart + digits.substring(digits.length() - visibleDigits);
+    }
 }

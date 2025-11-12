@@ -1,6 +1,5 @@
 package com.user.application.user.service;
 
-
 import com.user.application.user.dto.UserRequest;
 import com.user.application.user.dto.UserResponse;
 import com.user.application.user.factory.UserFactory;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService implements UserUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
-
     private final UserValidator userValidator;
     private final UserFactory userFactory;
     private final UserResponseMapper userResponseMapper;

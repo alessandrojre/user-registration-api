@@ -11,6 +11,8 @@ import com.user.domain.user.port.UserRepositoryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Clock;
+
 @Configuration
 public class BeanConfig {
 
@@ -20,6 +22,9 @@ public class BeanConfig {
                                            PasswordEncoderPort passwordEncoder,
                                            RegexProperties regexProps,
                                            SecurityProperties securityProps) {
+
+
+
         UserValidator validator = new UserValidator(
                 regexProps.getEmailRegex(),
                 regexProps.getPasswordRegex(),
